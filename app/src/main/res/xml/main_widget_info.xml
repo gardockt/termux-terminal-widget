@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:configure="com.gardockt.termuxterminalwidget.mainwidget.MainWidgetConfigureActivity"
+    android:description="@string/main_widget_description"
+    android:initialKeyguardLayout="@layout/main_widget"
+    android:initialLayout="@layout/main_widget"
+    android:minWidth="40dp"
+    android:minHeight="40dp"
+    android:resizeMode="horizontal|vertical"
+    android:updatePeriodMillis="0"
+    android:widgetCategory="home_screen"
+    android:widgetFeatures="reconfigurable" />

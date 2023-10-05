@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">Termux Terminal Widget</string>
+
+    <string name="ok">OK</string>
+    <string name="command">Command</string>
+
+    <string name="command_runner_service_notification">Service notification</string>
+    <string name="service_is_running">Service is running</string>
+
+    <string name="main_widget_description">Display output of a given command.</string>
+    <string name="cannot_update_widget_service_not_running">Cannot update the widget, as the service is not running - open the app to start it</string>
+    <string name="error_creating_widget">Error while creating a widget</string>
+    <string name="error_updating_preferences">Error while updating preferences</string>
+
+    <string name="main_activity_placeholder">Hello World!\n\nThis activity is a placeholder, and may contain settings in the future.</string>
 </resources>
