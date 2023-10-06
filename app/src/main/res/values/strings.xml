@@ -13,4 +13,8 @@
     <string name="error_updating_preferences">Error while updating preferences</string>
 
     <string name="main_activity_placeholder">Hello World!\n\nThis activity is a placeholder, and may contain settings in the future.</string>
+
+    <string name="permission_required">Permission required</string>
+    <string name="required_permission_denied">Required permission has been denied, cannot continue</string>
+    <string name="permission_RUN_COMMAND_prompt">The app needs Termux permission to run commands. Please grant the permission on the next screen.</string>
 </resources>
