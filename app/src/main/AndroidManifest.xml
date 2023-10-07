@@ -31,6 +31,14 @@
                 android:resource="@xml/main_widget_info" />
         </receiver>
 
+        <receiver
+            android:name=".shell.CommandRunnerServiceBootReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
         <activity
             android:name=".mainwidget.MainWidgetConfigureActivity"
             android:exported="false">
@@ -38,6 +46,7 @@
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -47,6 +56,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <service android:name=".shell.CommandRunnerService" />
         <service android:name=".shell.PluginResultsService" />
     </application>
