@@ -60,6 +60,7 @@ public class MainWidget extends AppWidgetProvider {
     private final static TriConsumer<Context, Integer, String> onCommandFinished = (context, widgetId, stdout) -> {
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.main_widget);
+        views.setOnClickPendingIntent(R.id.text, onClickPendingIntent(context, widgetId));
         views.setTextViewText(R.id.text, parseOutput(stdout));
         appWidgetManager.updateAppWidget(widgetId, views);
     };
