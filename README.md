@@ -3,6 +3,8 @@ Termux Terminal Widget
 
 Widget that displays output of a shell command.
 
+### [APK Download](https://codeberg.org/gardockt/termux-terminal-widget/releases)
+
 ![](assets/showcase.png)
 
 ## Requirements
