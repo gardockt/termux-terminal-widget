@@ -9,7 +9,7 @@ Widget that displays output of a shell command.
 
 ## Requirements
 * Android 7.0+
-* [Termux](https://github.com/termux/termux-app)
+* [Termux](https://github.com/termux/termux-app) v0.109+
 
 ## Limitations
 * **No session display, only output:** from my understanding this is impossible to overcome, as running a session is possible only with access to Termux app data - due to Android security system, only Termux can access these files. Other apps from Termux organization, such as Termux:Float, work around this by running as a Termux user, however this can be done only when both Termux and the other app are signed with the same key. The most viable option to make so is to manually compile both Termux and this app - realistically, I don't think anyone is going to do so, and therefore I'm not going to work on this. Note that even without this problem, I cannot guarantee that making a session display is possible.
