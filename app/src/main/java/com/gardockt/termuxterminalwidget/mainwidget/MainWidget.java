@@ -15,6 +15,7 @@ import android.widget.RemoteViews;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.work.Data;
 import androidx.work.PeriodicWorkRequest;
@@ -107,7 +108,11 @@ public class MainWidget extends AppWidgetProvider {
 
     // This is not going to be accurate. See the note above MainWidget.
     @NonNull
-    private static String parseOutput(@NonNull String output) {
+    private static String parseOutput(@Nullable String output) {
+        if (output == null) {
+            return "";
+        }
+
         // remove ANSI escape sequences
         return output.replaceAll("\\e\\[[\\d;?]*[a-zA-Z]", "");
     }
