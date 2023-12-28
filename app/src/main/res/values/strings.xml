@@ -4,6 +4,7 @@
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="command">Command</string>
+    <string name="error">Error</string>
 
     <string name="command_runner_service_notification">Service notification</string>
     <string name="service_is_running">Service is running</string>
@@ -15,6 +16,8 @@
 
     <string name="main_activity_placeholder">Hello World!\n\nThis activity is a placeholder, and may contain settings in the future.</string>
 
+    <string name="error_termux_missing">This app will not work without Termux, which is not installed.</string>
+    <string name="error_termux_outdated">This app requires Termux v0.109 or later. In order to use this app, please update Termux.</string>
     <string name="permission_required">Permission required</string>
     <string name="required_permission_denied">Required permission has been denied, cannot continue</string>
     <string name="permission_RUN_COMMAND_prompt">The app needs Termux permission to run commands. Please grant the permission on the next screen.</string>

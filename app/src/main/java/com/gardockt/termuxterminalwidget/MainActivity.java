@@ -12,12 +12,14 @@ import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.gardockt.termuxterminalwidget.shell.CommandRunnerService;
@@ -28,6 +30,7 @@ import com.termux.shared.termux.TermuxConstants;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
+    private static final String TAG = MainActivity.class.getSimpleName();
 
     private final ActivityResultLauncher<Intent> settingsActivityResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -51,7 +54,32 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        requestRequiredPermissions();
+        String termuxPackageName = "com.termux";
+        int termuxRequiredVersionCode = 109;
+
+        try {
+            // throws PackageManager.NameNotFoundException if Termux is not installed
+            PackageInfo termuxPackageInfo = getPackageManager().getPackageInfo(termuxPackageName, 0);
+
+            // exception not thrown, Termux is installed
+            Log.d(TAG, "Found Termux, version code is " + termuxPackageInfo.versionCode);
+            if (termuxPackageInfo.versionCode >= termuxRequiredVersionCode) {
+                requestRequiredPermissions();
+            } else {
+                displayFatalErrorDialog(R.string.error_termux_outdated);
+            }
+        } catch (PackageManager.NameNotFoundException ex) {
+            displayFatalErrorDialog(R.string.error_termux_missing);
+        }
+    }
+
+    private void displayFatalErrorDialog(int messageId) {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.error)
+                .setMessage(messageId)
+                .setOnDismissListener((d) -> finish())
+                .setPositiveButton(R.string.ok, (dialogInterface, i) -> {})
+                .show();
     }
 
     /*
