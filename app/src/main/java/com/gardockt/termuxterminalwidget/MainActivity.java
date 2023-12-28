@@ -97,8 +97,13 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         // launching Permissions activity directly is not possible
         // https://stackoverflow.com/q/32822101
 
+        Runnable onCancel = () -> {
+            Toast.makeText(this, R.string.required_permission_denied, Toast.LENGTH_SHORT).show();
+            finish();
+        };
+
         if (ActivityCompat.checkSelfPermission(this, TermuxConstants.PERMISSION_RUN_COMMAND) == PackageManager.PERMISSION_DENIED) {
-            AlertDialog dialog = new AlertDialog.Builder(this)
+            new AlertDialog.Builder(this)
                     .setTitle(R.string.permission_required)
                     .setMessage(R.string.permission_RUN_COMMAND_prompt)
                     .setPositiveButton(R.string.ok, (dialogInterface, i) -> {
@@ -107,8 +112,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                         intent.setData(uri);
                         settingsActivityResultLauncher.launch(intent);
                     })
-                    .create();
-            dialog.show();
+                    .setNegativeButton(R.string.cancel, (dialogInterface, i) -> onCancel.run())
+                    .setOnCancelListener((dialog) -> onCancel.run())
+                    .show();
         } else {
             startCommandRunnerService();
         }

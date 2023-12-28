@@ -2,6 +2,7 @@
     <string name="app_name">Termux Terminal Widget</string>
 
     <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
     <string name="command">Command</string>
 
     <string name="command_runner_service_notification">Service notification</string>
