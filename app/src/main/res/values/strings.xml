@@ -1,6 +1,4 @@
 <resources>
-    <string name="app_name">Termux Terminal Widget</string>
-
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="command">Command</string>
