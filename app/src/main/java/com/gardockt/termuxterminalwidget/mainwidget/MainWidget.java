@@ -7,6 +7,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -22,6 +23,7 @@ import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 import androidx.work.WorkRequest;
 
+import com.gardockt.termuxterminalwidget.GlobalPreferencesUtils;
 import com.gardockt.termuxterminalwidget.R;
 import com.gardockt.termuxterminalwidget.util.RequestCodeManager;
 import com.gardockt.termuxterminalwidget.util.TriConsumer;
@@ -29,6 +31,8 @@ import com.gardockt.termuxterminalwidget.shell.CommandRunner;
 import com.gardockt.termuxterminalwidget.shell.CommandRunnerService;
 import com.gardockt.termuxterminalwidget.exceptions.InvalidConfigurationException;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 // NOTE: ideally TerminalView from Termux should be used, however it does not seem to be able to
@@ -60,11 +64,13 @@ public class MainWidget extends AppWidgetProvider {
 
     private final static TriConsumer<Context, Integer, String> onCommandFinished = (context, widgetId, stdout) -> {
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.main_widget);
+        RemoteViews views = getInitializedRemoteViews(context);
         views.setOnClickPendingIntent(R.id.text, onClickPendingIntent(context, widgetId));
         views.setTextViewText(R.id.text, parseOutput(stdout));
         appWidgetManager.updateAppWidget(widgetId, views);
     };
+
+    private final static Map<Integer, SharedPreferences.OnSharedPreferenceChangeListener> globalPreferenceChangeListenersByWidgetId = new HashMap<>();
 
     public final static String ACTION_CLICK = "click";
     public final static String EXTRA_WIDGET_ID = "widget_id";
@@ -72,9 +78,18 @@ public class MainWidget extends AppWidgetProvider {
     public static void updateWidget(@NonNull Context context, @NonNull AppWidgetManager appWidgetManager, int widgetId, boolean silent) {
         Log.d(TAG, "updateAppWidget");
 
+        if (!globalPreferenceChangeListenersByWidgetId.containsKey(widgetId)) {
+            Log.d(TAG, "Registering global preference change listener for widget ID " + widgetId);
+            SharedPreferences.OnSharedPreferenceChangeListener listener =
+                    (preferences, key) -> onGlobalPreferenceChanged(context, preferences, key, widgetId);
+            GlobalPreferencesUtils.getSharedPreferences(context)
+                    .registerOnSharedPreferenceChangeListener(listener);
+            globalPreferenceChangeListenersByWidgetId.put(widgetId, listener);
+        }
+
         // set on-click action outside command callback, so that it will be there even if the update
         // fails
-        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.main_widget);
+        RemoteViews views = getInitializedRemoteViews(context);
         views.setOnClickPendingIntent(R.id.text, onClickPendingIntent(context, widgetId));
         appWidgetManager.updateAppWidget(widgetId, views);
 
@@ -103,6 +118,60 @@ public class MainWidget extends AppWidgetProvider {
 
             String command = preferences.getCommand();
             CommandRunner.runCommand(context, command, (exitCode, stdout, stderr) -> onCommandFinished.accept(context, widgetId, stdout));
+        }
+    }
+
+    // Returns RemoteViews object representing the widget, initialized with global settings.
+    @NonNull
+    private static RemoteViews getInitializedRemoteViews(@NonNull Context context) {
+        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.main_widget);
+        SharedPreferences globalPreferences = GlobalPreferencesUtils.getSharedPreferences(context);
+        String[] keysToUpdate = {
+                GlobalPreferencesUtils.KEY_DEFAULT_COLOR_FOREGROUND,
+                GlobalPreferencesUtils.KEY_DEFAULT_COLOR_BACKGROUND,
+        };
+
+        for (String key : keysToUpdate) {
+            updateRemoteViewsByGlobalPreferencesKey(context, globalPreferences, key, views);
+        }
+
+        return views;
+    }
+
+    private static void onGlobalPreferenceChanged(
+            @NonNull Context context,
+            @NonNull SharedPreferences globalPreferences,
+            @NonNull String key,
+            int widgetId
+    ) {
+        Log.d(TAG, String.format("Widget %d: Global preferences changed for key %s", widgetId, key));
+
+        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.main_widget);
+        updateRemoteViewsByGlobalPreferencesKey(context, globalPreferences, key, views);
+        AppWidgetManager.getInstance(context).updateAppWidget(widgetId, views);
+    }
+
+    private static void updateRemoteViewsByGlobalPreferencesKey(
+            @NonNull Context context,
+            @NonNull SharedPreferences globalPreferences,
+            @NonNull String key,
+            @NonNull RemoteViews views
+    ) {
+        switch (key) {
+            case GlobalPreferencesUtils.KEY_DEFAULT_COLOR_FOREGROUND:
+                int defaultColorFg = context.getColor(R.color.widget_default_color_foreground);
+                int colorFg = globalPreferences.getInt(key, defaultColorFg);
+                Log.d(TAG, String.format("Setting foreground color to #%8X", colorFg));
+                views.setInt(R.id.text, "setTextColor", colorFg);
+                break;
+            case GlobalPreferencesUtils.KEY_DEFAULT_COLOR_BACKGROUND:
+                int defaultColorBg = context.getColor(R.color.widget_default_color_background);
+                int colorBg = globalPreferences.getInt(key, defaultColorBg);
+                Log.d(TAG, String.format("Setting background color to #%8X", colorBg));
+                views.setInt(R.id.text, "setBackgroundColor", colorBg);
+                break;
+            default:
+                Log.e(TAG, String.format("Updating RemoteViews by global preferences key %s is not implemented", key));
         }
     }
 
@@ -150,6 +219,13 @@ public class MainWidget extends AppWidgetProvider {
         for (int widgetId : widgetIds) {
             MainWidgetPreferencesManager.delete(context, widgetId);
             cancelUpdateWork(context, widgetId);
+
+            SharedPreferences.OnSharedPreferenceChangeListener listener = globalPreferenceChangeListenersByWidgetId.get(widgetId);
+            if (listener != null) {
+                GlobalPreferencesUtils.getSharedPreferences(context)
+                        .unregisterOnSharedPreferenceChangeListener(listener);
+                globalPreferenceChangeListenersByWidgetId.remove(widgetId);
+            }
         }
     }
 

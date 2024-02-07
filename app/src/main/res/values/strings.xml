@@ -12,7 +12,8 @@
     <string name="error_creating_widget">Error while creating a widget</string>
     <string name="error_updating_preferences">Error while updating preferences</string>
 
-    <string name="main_activity_placeholder">Hello World!\n\nThis activity is a placeholder, and may contain settings in the future.</string>
+    <string name="default_color_foreground">Default foreground color</string>
+    <string name="default_color_background">Default background color</string>
 
     <string name="error_termux_missing">This app will not work without Termux, which is not installed.</string>
     <string name="error_termux_outdated">This app requires Termux v0.109 or later. In order to use this app, please update Termux.</string>

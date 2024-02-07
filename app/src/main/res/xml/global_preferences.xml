@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <com.jaredrummler.android.colorpicker.ColorPreferenceCompat
+        android:key="default_color_foreground"
+        android:title="@string/default_color_foreground"
+        android:defaultValue="@color/widget_default_color_foreground"
+        app:cpv_dialogType="custom"
+        app:cpv_allowPresets="false"
+        app:cpv_showAlphaSlider="true" />
+
+    <com.jaredrummler.android.colorpicker.ColorPreferenceCompat
+        android:key="default_color_background"
+        android:title="@string/default_color_background"
+        android:defaultValue="@color/widget_default_color_background"
+        app:cpv_dialogType="custom"
+        app:cpv_allowPresets="false"
+        app:cpv_showAlphaSlider="true" />
+
+</PreferenceScreen>
