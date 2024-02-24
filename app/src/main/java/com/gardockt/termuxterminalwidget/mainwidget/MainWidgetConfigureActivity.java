@@ -3,21 +3,38 @@ package com.gardockt.termuxterminalwidget.mainwidget;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
 
+import com.gardockt.termuxterminalwidget.ColorPickerDialogInvoker;
+import com.gardockt.termuxterminalwidget.GlobalPreferencesUtils;
 import com.gardockt.termuxterminalwidget.R;
+import com.gardockt.termuxterminalwidget.components.ColorButton;
 import com.gardockt.termuxterminalwidget.databinding.MainWidgetConfigureBinding;
 import com.gardockt.termuxterminalwidget.exceptions.InvalidConfigurationException;
+import com.jaredrummler.android.colorpicker.ColorPickerDialogListener;
 
-public class MainWidgetConfigureActivity extends AppCompatActivity {
+public class MainWidgetConfigureActivity extends AppCompatActivity implements ColorPickerDialogListener {
+
+    private static final String TAG = MainWidgetConfigureActivity.class.getSimpleName();
 
     private int widgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
+
     private EditText commandField;
+    private SwitchCompat customColorsSwitch;
+    private LinearLayout customColorsLayout;
+    private ColorButton colorForegroundButton;
+    private ColorButton colorBackgroundButton;
+
     private final View.OnClickListener onConfirmButtonClickListener = new View.OnClickListener() {
         public void onClick(View v) {
             final Context context = MainWidgetConfigureActivity.this;
@@ -25,6 +42,10 @@ public class MainWidgetConfigureActivity extends AppCompatActivity {
             String command = commandField.getText().toString();
 
             MainWidgetPreferences preferences = new MainWidgetPreferences(command);
+            if (customColorsSwitch.isChecked()) {
+                preferences.setColorForeground(colorForegroundButton.getColor());
+                preferences.setColorBackground(colorBackgroundButton.getColor());
+            }
 
             try {
                 MainWidget.createWidget(context, widgetId, preferences);
@@ -59,6 +80,28 @@ public class MainWidgetConfigureActivity extends AppCompatActivity {
         commandField = binding.commandField;
         binding.confirmButton.setOnClickListener(onConfirmButtonClickListener);
 
+        customColorsLayout = binding.customColorsLayout;
+        customColorsSwitch = binding.customColorsSwitch;
+        customColorsSwitch.setOnCheckedChangeListener((view, checked) -> {
+            customColorsLayout.setVisibility(checked ? View.VISIBLE : View.GONE);
+        });
+
+        colorForegroundButton = binding.colorForegroundButton;
+        colorForegroundButton.setOnClickListener(
+                (view) -> ColorPickerDialogInvoker.showForegroundColorPicker(
+                        this,
+                        colorForegroundButton.getColor()
+                )
+        );
+
+        colorBackgroundButton = binding.colorBackgroundButton;
+        colorBackgroundButton.setOnClickListener(
+                (view) -> ColorPickerDialogInvoker.showBackgroundColorPicker(
+                        this,
+                        colorBackgroundButton.getColor()
+                )
+        );
+
         // word wrapping without allowing newline character; cannot be done in XML
         // https://stackoverflow.com/a/31683560
         commandField.setMaxLines(Integer.MAX_VALUE);
@@ -86,5 +129,55 @@ public class MainWidgetConfigureActivity extends AppCompatActivity {
         }
 
         commandField.setText(preferences.getCommand());
+
+        prepareCustomColors(preferences);
+    }
+
+    private void prepareCustomColors(@NonNull MainWidgetPreferences widgetPreferences) {
+        SharedPreferences globalPreferences = GlobalPreferencesUtils.getSharedPreferences(this);
+        boolean customColorsEnabled = false;
+
+        Integer colorForeground = widgetPreferences.getColorForeground();
+        if (colorForeground != null) {
+            customColorsEnabled = true;
+        } else {
+            colorForeground = globalPreferences.getInt(
+                    GlobalPreferencesUtils.KEY_DEFAULT_COLOR_FOREGROUND,
+                    getColor(R.color.widget_default_color_foreground)
+            );
+        }
+        colorForegroundButton.setColor(colorForeground);
+
+        Integer colorBackground = widgetPreferences.getColorBackground();
+        if (colorBackground != null) {
+            customColorsEnabled = true;
+        } else {
+            colorBackground = globalPreferences.getInt(
+                    GlobalPreferencesUtils.KEY_DEFAULT_COLOR_BACKGROUND,
+                    getColor(R.color.widget_default_color_background)
+            );
+        }
+        colorBackgroundButton.setColor(colorBackground);
+
+        customColorsSwitch.setChecked(customColorsEnabled);
+    }
+
+    @Override
+    public void onColorSelected(int dialogId, int color) {
+        switch (dialogId) {
+            case ColorPickerDialogInvoker.COLOR_PICKER_CALLBACK_FOREGROUND:
+                colorForegroundButton.setColor(color);
+                break;
+            case ColorPickerDialogInvoker.COLOR_PICKER_CALLBACK_BACKGROUND:
+                colorBackgroundButton.setColor(color);
+                break;
+            default:
+                Log.e(TAG, "onColorSelected attempted to handle unknown dialog ID: " + dialogId);
+        }
+    }
+
+    @Override
+    public void onDialogDismissed(int dialogId) {
+        // intentionally left empty
     }
 }
