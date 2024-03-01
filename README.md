@@ -6,7 +6,7 @@ Widget that displays output of a shell command.
 [<img src="assets/izzy_on_droid.png" alt="Get it on IzzyOnDroid" height="70">](https://apt.izzysoft.de/fdroid/index/apk/com.gardockt.termuxterminalwidget)
 [<img src="assets/codeberg.svg" alt="Get it on Codeberg" height="70">](https://codeberg.org/gardockt/termux-terminal-widget/releases)
 
-![](assets/showcase.png)
+<img src="assets/showcase.png" alt="Screenshot" height="480">
 
 ## Requirements
 * Android 7.0+
