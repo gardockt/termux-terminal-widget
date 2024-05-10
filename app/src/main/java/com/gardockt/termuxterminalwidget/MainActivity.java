@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.Fragment;
 
 import android.app.AlertDialog;
 import android.content.ComponentName;
@@ -25,11 +26,12 @@ import android.widget.Toast;
 import com.gardockt.termuxterminalwidget.shell.CommandRunnerService;
 import com.gardockt.termuxterminalwidget.mainwidget.MainWidget;
 import com.gardockt.termuxterminalwidget.util.RequestCodeManager;
+import com.jaredrummler.android.colorpicker.ColorPickerDialogListener;
 import com.termux.shared.termux.TermuxConstants;
 
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
+public class MainActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback, ColorPickerDialogListener {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private final ActivityResultLauncher<Intent> settingsActivityResultLauncher = registerForActivityResult(
@@ -170,4 +172,21 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         }
     }
 
+    // https://github.com/jaredrummler/ColorPicker/issues/5
+
+    @Override
+    public void onColorSelected(int dialogId, int color) {
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainerView);
+        if (fragment instanceof ColorPickerDialogListener) {
+            ((ColorPickerDialogListener) fragment).onColorSelected(dialogId, color);
+        }
+    }
+
+    @Override
+    public void onDialogDismissed(int dialogId) {
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainerView);
+        if (fragment instanceof ColorPickerDialogListener) {
+            ((ColorPickerDialogListener) fragment).onDialogDismissed(dialogId);
+        }
+    }
 }

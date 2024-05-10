@@ -4,6 +4,7 @@
     <string name="command">Command</string>
     <string name="error">Error</string>
     <string name="colors">Colors</string>
+    <string name="default_colors">Default colors</string>
     <string name="custom_colors">Custom colors</string>
     <string name="foreground">Foreground</string>
     <string name="background">Background</string>
@@ -15,9 +16,6 @@
     <string name="cannot_update_widget_service_not_running">Cannot update the widget, as the service is not running - open the app to start it</string>
     <string name="error_creating_widget">Error while creating a widget</string>
     <string name="error_updating_preferences">Error while updating preferences</string>
-
-    <string name="default_color_foreground">Default foreground color</string>
-    <string name="default_color_background">Default background color</string>
 
     <string name="error_termux_missing">This app will not work without Termux, which is not installed.</string>
     <string name="error_termux_outdated">This app requires Termux v0.109 or later. In order to use this app, please update Termux.</string>
