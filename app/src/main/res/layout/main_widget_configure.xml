@@ -15,7 +15,8 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             android:labelFor="@id/command_field"
-            android:text="@string/command" />
+            android:text="@string/command"
+            android:textStyle="bold" />
 
         <EditText
             android:id="@+id/command_field"
@@ -29,7 +30,9 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/colors" />
+            android:layout_marginBottom="8dp"
+            android:text="@string/colors"
+            android:textStyle="bold" />
 
         <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/custom_colors_switch"
