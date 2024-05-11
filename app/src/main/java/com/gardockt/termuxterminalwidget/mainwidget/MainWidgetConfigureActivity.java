@@ -106,11 +106,6 @@ public class MainWidgetConfigureActivity extends AppCompatActivity implements Co
                 )
         );
 
-        // word wrapping without allowing newline character; cannot be done in XML
-        // https://stackoverflow.com/a/31683560
-        commandField.setMaxLines(Integer.MAX_VALUE);
-        commandField.setHorizontallyScrolling(false);
-
         // Find the widget id from the intent.
         Intent intent = getIntent();
         Bundle extras = intent.getExtras();

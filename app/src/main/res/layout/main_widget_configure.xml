@@ -24,7 +24,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             android:fontFamily="monospace"
-            android:inputType="text"
+            android:inputType="text|textMultiLine"
             android:importantForAutofill="no" />
 
         <TextView
