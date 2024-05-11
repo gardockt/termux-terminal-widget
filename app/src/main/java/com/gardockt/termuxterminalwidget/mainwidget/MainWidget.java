@@ -7,7 +7,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -23,6 +22,7 @@ import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 import androidx.work.WorkRequest;
 
+import com.gardockt.termuxterminalwidget.GlobalPreferences;
 import com.gardockt.termuxterminalwidget.GlobalPreferencesUtils;
 import com.gardockt.termuxterminalwidget.R;
 import com.gardockt.termuxterminalwidget.util.RequestCodeManager;
@@ -31,9 +31,15 @@ import com.gardockt.termuxterminalwidget.shell.CommandRunner;
 import com.gardockt.termuxterminalwidget.shell.CommandRunnerService;
 import com.gardockt.termuxterminalwidget.exceptions.InvalidConfigurationException;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
+
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.disposables.Disposable;
 
 // NOTE: ideally TerminalView from Termux should be used, however it does not seem to be able to
 //       just print given text, and running sessions with non-Termux apps seems to be impossible due
@@ -70,7 +76,7 @@ public class MainWidget extends AppWidgetProvider {
         appWidgetManager.updateAppWidget(widgetId, views);
     };
 
-    private final static Map<Integer, SharedPreferences.OnSharedPreferenceChangeListener> globalPreferenceChangeListenersByWidgetId = new HashMap<>();
+    private final static Map<Integer, List<Disposable>> subscriptionsByWidgetId = new HashMap<>();
 
     public final static String ACTION_CLICK = "click";
     public final static String EXTRA_WIDGET_ID = "widget_id";
@@ -78,13 +84,24 @@ public class MainWidget extends AppWidgetProvider {
     public static void updateWidget(@NonNull Context context, @NonNull AppWidgetManager appWidgetManager, int widgetId, boolean silent) {
         Log.d(TAG, "updateAppWidget");
 
-        if (!globalPreferenceChangeListenersByWidgetId.containsKey(widgetId)) {
-            Log.d(TAG, "Registering global preference change listener for widget ID " + widgetId);
-            SharedPreferences.OnSharedPreferenceChangeListener listener =
-                    (preferences, key) -> onGlobalPreferenceChanged(context, preferences, key, widgetId);
-            GlobalPreferencesUtils.getSharedPreferences(context)
-                    .registerOnSharedPreferenceChangeListener(listener);
-            globalPreferenceChangeListenersByWidgetId.put(widgetId, listener);
+        if (!subscriptionsByWidgetId.containsKey(widgetId)) {
+            Log.d(TAG, "Setting up global preference change listeners for widget ID " + widgetId);
+
+            Observable<GlobalPreferences> globalPrefsObservable = GlobalPreferencesUtils.getObservable(context);
+            List<Disposable> subscriptions = new ArrayList<>();
+            subscriptions.add(
+                    globalPrefsObservable
+                            .map(GlobalPreferences::getColorForeground)
+                            .distinctUntilChanged()
+                            .subscribe((color) -> onGlobalColorForegroundChanged(context, widgetId, color))
+            );
+            subscriptions.add(
+                    globalPrefsObservable
+                            .map(GlobalPreferences::getColorBackground)
+                            .distinctUntilChanged()
+                            .subscribe((color) -> onGlobalColorBackgroundChanged(context, widgetId, color))
+            );
+            subscriptionsByWidgetId.put(widgetId, subscriptions);
         }
 
         // set on-click action outside command callback, so that it will be there even if the update
@@ -131,19 +148,17 @@ public class MainWidget extends AppWidgetProvider {
         views.setInt(R.id.text, "setBackgroundColor", color);
     }
 
+    private static void applyGlobalPreferences(@NonNull RemoteViews views, @NonNull GlobalPreferences preferences) {
+        setColorForeground(views, preferences.getColorForeground());
+        setColorBackground(views, preferences.getColorBackground());
+    }
+
     // Returns RemoteViews object representing the widget, initialized with settings.
     @NonNull
     private static RemoteViews getInitializedRemoteViews(@NonNull Context context, @NonNull MainWidgetPreferences preferences) {
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.main_widget);
-        SharedPreferences globalPreferences = GlobalPreferencesUtils.getSharedPreferences(context);
-        String[] keysToUpdate = {
-                GlobalPreferencesUtils.KEY_DEFAULT_COLOR_FOREGROUND,
-                GlobalPreferencesUtils.KEY_DEFAULT_COLOR_BACKGROUND,
-        };
-
-        for (String key : keysToUpdate) {
-            updateRemoteViewsByGlobalPreferencesKey(context, globalPreferences, key, views, preferences);
-        }
+        GlobalPreferences globalPreferences = GlobalPreferencesUtils.get(context);
+        applyGlobalPreferences(views, globalPreferences);
 
         if (preferences.getColorForeground() != null) {
             setColorForeground(views, preferences.getColorForeground());
@@ -168,60 +183,32 @@ public class MainWidget extends AppWidgetProvider {
         }
     }
 
-    private static void onGlobalPreferenceChanged(
-            @NonNull Context context,
-            @NonNull SharedPreferences globalPreferences,
-            @NonNull String key,
-            int widgetId
-    ) {
-        Log.d(TAG, String.format("Widget %d: Global preferences changed for key %s", widgetId, key));
-
+    /**
+     * Updates RemoteViews of given widget.
+     */
+    // We could use Consumer<RemoteViews> for changeFn and don't pass value, but this way we can
+    // pass references to setter functions.
+    private static <T> void updateRemoteViews(@NonNull Context context, int widgetId, @NonNull BiConsumer<RemoteViews, T> changeFn, T value) {
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.main_widget);
-        updateRemoteViewsByGlobalPreferencesKey(context, globalPreferences, key, views, widgetId);
+        changeFn.accept(views, value);
         AppWidgetManager.getInstance(context).updateAppWidget(widgetId, views);
     }
 
-    private static void updateRemoteViewsByGlobalPreferencesKey(
-            @NonNull Context context,
-            @NonNull SharedPreferences globalPreferences,
-            @NonNull String key,
-            @NonNull RemoteViews views,
-            @NonNull MainWidgetPreferences widgetPreferences
-    ) {
-        switch (key) {
-            case GlobalPreferencesUtils.KEY_DEFAULT_COLOR_FOREGROUND:
-            {
-                if (widgetPreferences.getColorForeground() == null) {
-                    int defaultColorFg = context.getColor(R.color.widget_default_color_foreground);
-                    int colorFg = globalPreferences.getInt(key, defaultColorFg);
-                    setColorForeground(views, colorFg);
-                }
-                break;
-            }
-            case GlobalPreferencesUtils.KEY_DEFAULT_COLOR_BACKGROUND:
-            {
-                if (widgetPreferences.getColorBackground() == null) {
-                    int defaultColorBg = context.getColor(R.color.widget_default_color_background);
-                    int colorBg = globalPreferences.getInt(key, defaultColorBg);
-                    setColorBackground(views, colorBg);
-                }
-                break;
-            }
-            default:
-                Log.e(TAG, String.format("Updating RemoteViews by global preferences key %s is not implemented", key));
-        }
-    }
-
-    private static void updateRemoteViewsByGlobalPreferencesKey(
-            @NonNull Context context,
-            @NonNull SharedPreferences globalPreferences,
-            @NonNull String key,
-            @NonNull RemoteViews views,
-            int widgetId
-    ) {
+    private static void onGlobalColorForegroundChanged(@NonNull Context context, int widgetId, int color) {
         try {
             MainWidgetPreferences widgetPreferences = MainWidgetPreferencesManager.load(context, widgetId);
-            updateRemoteViewsByGlobalPreferencesKey(context, globalPreferences, key, views, widgetPreferences);
+            if (widgetPreferences.getColorForeground() == null) {
+                updateRemoteViews(context, widgetId, MainWidget::setColorForeground, color);
+            }
+        } catch (InvalidConfigurationException ignored) {}
+    }
+
+    private static void onGlobalColorBackgroundChanged(@NonNull Context context, int widgetId, int color) {
+        try {
+            MainWidgetPreferences widgetPreferences = MainWidgetPreferencesManager.load(context, widgetId);
+            if (widgetPreferences.getColorBackground() == null) {
+                updateRemoteViews(context, widgetId, MainWidget::setColorBackground, color);
+            }
         } catch (InvalidConfigurationException ignored) {}
     }
 
@@ -270,11 +257,11 @@ public class MainWidget extends AppWidgetProvider {
             MainWidgetPreferencesManager.delete(context, widgetId);
             cancelUpdateWork(context, widgetId);
 
-            SharedPreferences.OnSharedPreferenceChangeListener listener = globalPreferenceChangeListenersByWidgetId.get(widgetId);
-            if (listener != null) {
-                GlobalPreferencesUtils.getSharedPreferences(context)
-                        .unregisterOnSharedPreferenceChangeListener(listener);
-                globalPreferenceChangeListenersByWidgetId.remove(widgetId);
+            List<Disposable> subscriptions = subscriptionsByWidgetId.get(widgetId);
+            if (subscriptions != null) {
+                for (Disposable sub : subscriptions) {
+                    sub.dispose();
+                }
             }
         }
     }

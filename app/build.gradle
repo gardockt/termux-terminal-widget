@@ -45,6 +45,7 @@ dependencies {
     implementation 'com.jaredrummler:colorpicker:1.1.0'
     implementation 'com.termux.termux-app:termux-shared:v0.118.0'
     implementation 'com.google.guava:guava:29.0-android'
+    implementation 'io.reactivex.rxjava3:rxjava:3.1.8'
     implementation "androidx.work:work-runtime:2.8.1"
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'

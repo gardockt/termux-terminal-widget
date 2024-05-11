@@ -3,7 +3,6 @@ package com.gardockt.termuxterminalwidget.mainwidget;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -16,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 
 import com.gardockt.termuxterminalwidget.ColorPickerDialogInvoker;
+import com.gardockt.termuxterminalwidget.GlobalPreferences;
 import com.gardockt.termuxterminalwidget.GlobalPreferencesUtils;
 import com.gardockt.termuxterminalwidget.R;
 import com.gardockt.termuxterminalwidget.components.ColorButton;
@@ -134,17 +134,14 @@ public class MainWidgetConfigureActivity extends AppCompatActivity implements Co
     }
 
     private void prepareCustomColors(@NonNull MainWidgetPreferences widgetPreferences) {
-        SharedPreferences globalPreferences = GlobalPreferencesUtils.getSharedPreferences(this);
+        GlobalPreferences globalPreferences = GlobalPreferencesUtils.get(this);
         boolean customColorsEnabled = false;
 
         Integer colorForeground = widgetPreferences.getColorForeground();
         if (colorForeground != null) {
             customColorsEnabled = true;
         } else {
-            colorForeground = globalPreferences.getInt(
-                    GlobalPreferencesUtils.KEY_DEFAULT_COLOR_FOREGROUND,
-                    getColor(R.color.widget_default_color_foreground)
-            );
+            colorForeground = globalPreferences.getColorForeground();
         }
         colorForegroundButton.setColor(colorForeground);
 
@@ -152,10 +149,7 @@ public class MainWidgetConfigureActivity extends AppCompatActivity implements Co
         if (colorBackground != null) {
             customColorsEnabled = true;
         } else {
-            colorBackground = globalPreferences.getInt(
-                    GlobalPreferencesUtils.KEY_DEFAULT_COLOR_BACKGROUND,
-                    getColor(R.color.widget_default_color_background)
-            );
+            colorBackground = globalPreferences.getColorBackground();
         }
         colorBackgroundButton.setColor(colorBackground);
 
