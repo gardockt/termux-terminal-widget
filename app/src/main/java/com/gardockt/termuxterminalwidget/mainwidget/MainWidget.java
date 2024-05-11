@@ -22,6 +22,7 @@ import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 import androidx.work.WorkRequest;
 
+import com.gardockt.termuxterminalwidget.ColorScheme;
 import com.gardockt.termuxterminalwidget.GlobalPreferences;
 import com.gardockt.termuxterminalwidget.GlobalPreferencesUtils;
 import com.gardockt.termuxterminalwidget.R;
@@ -91,15 +92,9 @@ public class MainWidget extends AppWidgetProvider {
             List<Disposable> subscriptions = new ArrayList<>();
             subscriptions.add(
                     globalPrefsObservable
-                            .map(GlobalPreferences::getColorForeground)
+                            .map(GlobalPreferences::getColorScheme)
                             .distinctUntilChanged()
-                            .subscribe((color) -> onGlobalColorForegroundChanged(context, widgetId, color))
-            );
-            subscriptions.add(
-                    globalPrefsObservable
-                            .map(GlobalPreferences::getColorBackground)
-                            .distinctUntilChanged()
-                            .subscribe((color) -> onGlobalColorBackgroundChanged(context, widgetId, color))
+                            .subscribe((colorScheme) -> onGlobalColorSchemeChanged(context, widgetId, colorScheme))
             );
             subscriptionsByWidgetId.put(widgetId, subscriptions);
         }
@@ -138,19 +133,18 @@ public class MainWidget extends AppWidgetProvider {
         }
     }
 
-    private static void setColorForeground(@NonNull RemoteViews views, int color) {
-        Log.d(TAG, String.format("Setting foreground color to #%08X", color));
-        views.setInt(R.id.text, "setTextColor", color);
-    }
-
-    private static void setColorBackground(@NonNull RemoteViews views, int color) {
-        Log.d(TAG, String.format("Setting background color to #%08X", color));
-        views.setInt(R.id.text, "setBackgroundColor", color);
+    private static void setColorScheme(@NonNull RemoteViews views, @NonNull ColorScheme colorScheme) {
+        Log.d(TAG, String.format(
+                "Setting color scheme: FG #%08X, BG #%08X",
+                colorScheme.getColorForeground(),
+                colorScheme.getColorBackground()
+        ));
+        views.setInt(R.id.text, "setTextColor", colorScheme.getColorForeground());
+        views.setInt(R.id.text, "setBackgroundColor", colorScheme.getColorBackground());
     }
 
     private static void applyGlobalPreferences(@NonNull RemoteViews views, @NonNull GlobalPreferences preferences) {
-        setColorForeground(views, preferences.getColorForeground());
-        setColorBackground(views, preferences.getColorBackground());
+        setColorScheme(views, preferences.getColorScheme());
     }
 
     // Returns RemoteViews object representing the widget, initialized with settings.
@@ -160,12 +154,8 @@ public class MainWidget extends AppWidgetProvider {
         GlobalPreferences globalPreferences = GlobalPreferencesUtils.get(context);
         applyGlobalPreferences(views, globalPreferences);
 
-        if (preferences.getColorForeground() != null) {
-            setColorForeground(views, preferences.getColorForeground());
-        }
-
-        if (preferences.getColorBackground() != null) {
-            setColorBackground(views, preferences.getColorBackground());
+        if (preferences.getColorScheme() != null) {
+            setColorScheme(views, preferences.getColorScheme());
         }
 
         return views;
@@ -194,20 +184,11 @@ public class MainWidget extends AppWidgetProvider {
         AppWidgetManager.getInstance(context).updateAppWidget(widgetId, views);
     }
 
-    private static void onGlobalColorForegroundChanged(@NonNull Context context, int widgetId, int color) {
+    private static void onGlobalColorSchemeChanged(@NonNull Context context, int widgetId, @NonNull ColorScheme colorScheme) {
         try {
             MainWidgetPreferences widgetPreferences = MainWidgetPreferencesManager.load(context, widgetId);
-            if (widgetPreferences.getColorForeground() == null) {
-                updateRemoteViews(context, widgetId, MainWidget::setColorForeground, color);
-            }
-        } catch (InvalidConfigurationException ignored) {}
-    }
-
-    private static void onGlobalColorBackgroundChanged(@NonNull Context context, int widgetId, int color) {
-        try {
-            MainWidgetPreferences widgetPreferences = MainWidgetPreferencesManager.load(context, widgetId);
-            if (widgetPreferences.getColorBackground() == null) {
-                updateRemoteViews(context, widgetId, MainWidget::setColorBackground, color);
+            if (widgetPreferences.getColorScheme() == null) {
+                updateRemoteViews(context, widgetId, MainWidget::setColorScheme, colorScheme);
             }
         } catch (InvalidConfigurationException ignored) {}
     }

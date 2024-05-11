@@ -1,10 +1,11 @@
 package com.gardockt.termuxterminalwidget.mainwidget;
 
+import com.gardockt.termuxterminalwidget.ColorScheme;
+
 public class MainWidgetPreferences {
 
     private String command;
-    private Integer colorForeground = null;
-    private Integer colorBackground = null;
+    private ColorScheme colorScheme = null;
 
     public MainWidgetPreferences(String command) {
         this.command = command;
@@ -18,19 +19,11 @@ public class MainWidgetPreferences {
         return command;
     }
 
-    public Integer getColorForeground() {
-        return colorForeground;
+    public ColorScheme getColorScheme() {
+        return colorScheme;
     }
 
-    public void setColorForeground(Integer colorForeground) {
-        this.colorForeground = colorForeground;
-    }
-
-    public Integer getColorBackground() {
-        return colorBackground;
-    }
-
-    public void setColorBackground(Integer colorBackground) {
-        this.colorBackground = colorBackground;
+    public void setColorScheme(ColorScheme colorScheme) {
+        this.colorScheme = colorScheme;
     }
 }

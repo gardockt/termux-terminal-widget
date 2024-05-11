@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 
 import androidx.annotation.NonNull;
 
+import com.gardockt.termuxterminalwidget.ColorScheme;
 import com.gardockt.termuxterminalwidget.exceptions.InvalidConfigurationException;
 
 public class MainWidgetPreferencesManager {
@@ -27,14 +28,27 @@ public class MainWidgetPreferencesManager {
 
         preferences = new MainWidgetPreferences(command);
 
+        boolean colorSchemeSet = true;
+
+        int colorForeground = 0;
         String colorFgKey = generateKey(widgetId, KEY_COLOR_FOREGROUND);
         if (sharedPreferences.contains(colorFgKey)) {
-            preferences.setColorForeground(sharedPreferences.getInt(colorFgKey, 0));
+            colorForeground = sharedPreferences.getInt(colorFgKey, 0);
+        } else {
+            colorSchemeSet = false;
         }
 
+        int colorBackground = 0;
         String colorBgKey = generateKey(widgetId, KEY_COLOR_BACKGROUND);
         if (sharedPreferences.contains(colorBgKey)) {
-            preferences.setColorBackground(sharedPreferences.getInt(colorBgKey, 0));
+            colorBackground = sharedPreferences.getInt(colorBgKey, 0);
+        } else {
+            colorSchemeSet = false;
+        }
+
+        if (colorSchemeSet) {
+            ColorScheme colorScheme = new ColorScheme(colorForeground, colorBackground);
+            preferences.setColorScheme(colorScheme);
         }
 
         return preferences;
@@ -49,15 +63,12 @@ public class MainWidgetPreferencesManager {
         }
         editor.putString(generateKey(widgetId, KEY_COMMAND), command);
 
-        if (preferences.getColorForeground() != null) {
-            editor.putInt(generateKey(widgetId, KEY_COLOR_FOREGROUND), preferences.getColorForeground());
+        ColorScheme colorScheme = preferences.getColorScheme();
+        if (colorScheme != null) {
+            editor.putInt(generateKey(widgetId, KEY_COLOR_FOREGROUND), colorScheme.getColorForeground());
+            editor.putInt(generateKey(widgetId, KEY_COLOR_BACKGROUND), colorScheme.getColorBackground());
         } else {
             editor.remove(generateKey(widgetId, KEY_COLOR_FOREGROUND));
-        }
-
-        if (preferences.getColorBackground() != null) {
-            editor.putInt(generateKey(widgetId, KEY_COLOR_BACKGROUND), preferences.getColorBackground());
-        } else {
             editor.remove(generateKey(widgetId, KEY_COLOR_BACKGROUND));
         }
 

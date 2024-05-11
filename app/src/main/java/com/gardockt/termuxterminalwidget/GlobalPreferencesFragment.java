@@ -59,25 +59,30 @@ public class GlobalPreferencesFragment extends Fragment implements ColorPickerDi
     }
 
     private void prepareColors() {
-        colorForegroundButton.setColor(preferences.getColorForeground());
-        colorBackgroundButton.setColor(preferences.getColorBackground());
+        ColorScheme colorScheme = preferences.getColorScheme();
+
+        colorForegroundButton.setColor(colorScheme.getColorForeground());
+        colorBackgroundButton.setColor(colorScheme.getColorBackground());
     }
 
     @Override
     public void onColorSelected(int dialogId, int color) {
+        ColorScheme colorScheme = preferences.getColorScheme();
+
         switch (dialogId) {
             case ColorPickerDialogInvoker.COLOR_PICKER_CALLBACK_FOREGROUND:
-                preferences.setColorForeground(color);
+                colorScheme.setColorForeground(color);
                 colorForegroundButton.setColor(color);
                 break;
             case ColorPickerDialogInvoker.COLOR_PICKER_CALLBACK_BACKGROUND:
-                preferences.setColorBackground(color);
+                colorScheme.setColorBackground(color);
                 colorBackgroundButton.setColor(color);
                 break;
             default:
                 Log.e(TAG, "onColorSelected attempted to handle unknown dialog ID: " + dialogId);
         }
 
+        preferences.setColorScheme(colorScheme);
         GlobalPreferencesUtils.save(requireContext(), preferences);
     }
 

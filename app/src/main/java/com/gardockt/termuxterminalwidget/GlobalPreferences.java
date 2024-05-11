@@ -6,28 +6,18 @@ import java.util.Objects;
 
 public class GlobalPreferences implements Cloneable {
 
-    private int colorForeground;
-    private int colorBackground;
+    private ColorScheme colorScheme;
 
-    public GlobalPreferences(int colorForeground, int colorBackground) {
-        this.colorForeground = colorForeground;
-        this.colorBackground = colorBackground;
+    public GlobalPreferences(@NonNull ColorScheme colorScheme) {
+        this.colorScheme = colorScheme;
     }
 
-    public int getColorForeground() {
-        return colorForeground;
+    public ColorScheme getColorScheme() {
+        return colorScheme;
     }
 
-    public void setColorForeground(int colorForeground) {
-        this.colorForeground = colorForeground;
-    }
-
-    public int getColorBackground() {
-        return colorBackground;
-    }
-
-    public void setColorBackground(int colorBackground) {
-        this.colorBackground = colorBackground;
+    public void setColorScheme(@NonNull ColorScheme colorScheme) {
+        this.colorScheme = colorScheme;
     }
 
     @NonNull
@@ -35,6 +25,7 @@ public class GlobalPreferences implements Cloneable {
     public GlobalPreferences clone() {
         try {
             GlobalPreferences clone = (GlobalPreferences) super.clone();
+            clone.setColorScheme(colorScheme.clone());
             return clone;
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();
@@ -46,12 +37,11 @@ public class GlobalPreferences implements Cloneable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         GlobalPreferences that = (GlobalPreferences) o;
-        return colorForeground == that.colorForeground &&
-                colorBackground == that.colorBackground;
+        return Objects.equals(colorScheme, that.colorScheme);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(colorForeground, colorBackground);
+        return Objects.hash(colorScheme);
     }
 }

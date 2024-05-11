@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 
 import com.gardockt.termuxterminalwidget.ColorPickerDialogInvoker;
+import com.gardockt.termuxterminalwidget.ColorScheme;
 import com.gardockt.termuxterminalwidget.GlobalPreferences;
 import com.gardockt.termuxterminalwidget.GlobalPreferencesUtils;
 import com.gardockt.termuxterminalwidget.R;
@@ -43,8 +44,11 @@ public class MainWidgetConfigureActivity extends AppCompatActivity implements Co
 
             MainWidgetPreferences preferences = new MainWidgetPreferences(command);
             if (customColorsSwitch.isChecked()) {
-                preferences.setColorForeground(colorForegroundButton.getColor());
-                preferences.setColorBackground(colorBackgroundButton.getColor());
+                ColorScheme colorScheme = new ColorScheme(
+                        colorForegroundButton.getColor(),
+                        colorBackgroundButton.getColor()
+                );
+                preferences.setColorScheme(colorScheme);
             }
 
             try {
@@ -135,23 +139,15 @@ public class MainWidgetConfigureActivity extends AppCompatActivity implements Co
 
     private void prepareCustomColors(@NonNull MainWidgetPreferences widgetPreferences) {
         GlobalPreferences globalPreferences = GlobalPreferencesUtils.get(this);
-        boolean customColorsEnabled = false;
+        ColorScheme colorScheme = widgetPreferences.getColorScheme();
+        boolean customColorsEnabled = (colorScheme != null);
 
-        Integer colorForeground = widgetPreferences.getColorForeground();
-        if (colorForeground != null) {
-            customColorsEnabled = true;
-        } else {
-            colorForeground = globalPreferences.getColorForeground();
+        if (!customColorsEnabled) {
+            colorScheme = globalPreferences.getColorScheme();
         }
-        colorForegroundButton.setColor(colorForeground);
 
-        Integer colorBackground = widgetPreferences.getColorBackground();
-        if (colorBackground != null) {
-            customColorsEnabled = true;
-        } else {
-            colorBackground = globalPreferences.getColorBackground();
-        }
-        colorBackgroundButton.setColor(colorBackground);
+        colorForegroundButton.setColor(colorScheme.getColorForeground());
+        colorBackgroundButton.setColor(colorScheme.getColorBackground());
 
         customColorsSwitch.setChecked(customColorsEnabled);
     }

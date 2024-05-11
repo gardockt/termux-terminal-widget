@@ -47,8 +47,9 @@ public class GlobalPreferencesUtils {
                 KEY_DEFAULT_COLOR_BACKGROUND,
                 context.getColor(R.color.widget_default_color_background)
         );
+        ColorScheme colorScheme = new ColorScheme(colorForeground, colorBackground);
 
-        GlobalPreferences preferences = new GlobalPreferences(colorForeground, colorBackground);
+        GlobalPreferences preferences = new GlobalPreferences(colorScheme);
         preferencesSubject.onNext(preferences);
         return preferences;
     }
@@ -57,8 +58,8 @@ public class GlobalPreferencesUtils {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 
         sharedPreferences.edit()
-                .putInt(KEY_DEFAULT_COLOR_FOREGROUND, preferences.getColorForeground())
-                .putInt(KEY_DEFAULT_COLOR_BACKGROUND, preferences.getColorBackground())
+                .putInt(KEY_DEFAULT_COLOR_FOREGROUND, preferences.getColorScheme().getColorForeground())
+                .putInt(KEY_DEFAULT_COLOR_BACKGROUND, preferences.getColorScheme().getColorBackground())
                 .apply();
 
         preferencesSubject.onNext(preferences);
