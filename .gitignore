@@ -8,8 +8,11 @@
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
 /.idea/deploymentTargetDropDown.xml
+/.idea/deploymentTargetSelector.xml
 .DS_Store
 /build
+/app/debug
+/app/release
 /captures
 .externalNativeBuild
 .cxx
