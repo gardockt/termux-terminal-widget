@@ -45,7 +45,7 @@
                     android:id="@+id/color_foreground_button"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
-                    android:color="@color/widget_default_color_foreground" />
+                    android:color="@color/white" />
             </LinearLayout>
 
             <Space
@@ -68,7 +68,7 @@
                     android:id="@+id/color_background_button"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
-                    android:color="@color/widget_default_color_background" />
+                    android:color="@color/white" />
             </LinearLayout>
 
             <Space

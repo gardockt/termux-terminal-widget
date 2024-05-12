@@ -37,19 +37,23 @@ public class GlobalPreferencesUtils {
 
     @NonNull
     private static GlobalPreferences load(@NonNull Context context) {
+        GlobalPreferences preferences = new GlobalPreferences();
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 
-        int colorForeground = sharedPreferences.getInt(
-                KEY_DEFAULT_COLOR_FOREGROUND,
-                context.getColor(R.color.widget_default_color_foreground)
-        );
-        int colorBackground = sharedPreferences.getInt(
-                KEY_DEFAULT_COLOR_BACKGROUND,
-                context.getColor(R.color.widget_default_color_background)
-        );
-        ColorScheme colorScheme = new ColorScheme(colorForeground, colorBackground);
+        Integer colorForeground = null;
+        Integer colorBackground = null;
 
-        GlobalPreferences preferences = new GlobalPreferences(colorScheme);
+        if (sharedPreferences.contains(KEY_DEFAULT_COLOR_FOREGROUND)) {
+            colorForeground = sharedPreferences.getInt(KEY_DEFAULT_COLOR_FOREGROUND, 0);
+        }
+        if (sharedPreferences.contains(KEY_DEFAULT_COLOR_BACKGROUND)) {
+            colorBackground = sharedPreferences.getInt(KEY_DEFAULT_COLOR_BACKGROUND, 0);
+        }
+        if (colorForeground != null && colorBackground != null) {
+            ColorScheme colorScheme = new ColorScheme(colorForeground, colorBackground);
+            preferences.setColorScheme(colorScheme);
+        }
+
         preferencesSubject.onNext(preferences);
         return preferences;
     }

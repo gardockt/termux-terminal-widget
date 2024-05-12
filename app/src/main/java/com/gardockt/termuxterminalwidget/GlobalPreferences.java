@@ -6,11 +6,7 @@ import java.util.Objects;
 
 public class GlobalPreferences implements Cloneable {
 
-    private ColorScheme colorScheme;
-
-    public GlobalPreferences(@NonNull ColorScheme colorScheme) {
-        this.colorScheme = colorScheme;
-    }
+    private ColorScheme colorScheme = new ColorScheme(0xFFFFFFFF, 0xBF000000);
 
     public ColorScheme getColorScheme() {
         return colorScheme;

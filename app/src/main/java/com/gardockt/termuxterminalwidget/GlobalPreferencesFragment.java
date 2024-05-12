@@ -29,15 +29,16 @@ public class GlobalPreferencesFragment extends Fragment implements ColorPickerDi
     }
 
     private void save() {
+        GlobalPreferences newPreferences = new GlobalPreferences();
         Context context = requireContext();
 
         ColorScheme colorScheme = new ColorScheme(
                 colorForegroundButton.getColor(),
                 colorBackgroundButton.getColor()
         );
-        GlobalPreferences newPreferences = new GlobalPreferences(colorScheme);
-        GlobalPreferencesUtils.save(context, newPreferences);
+        newPreferences.setColorScheme(colorScheme);
 
+        GlobalPreferencesUtils.save(context, newPreferences);
         Toast.makeText(context, R.string.settings_saved, Toast.LENGTH_SHORT).show();
     }
 
