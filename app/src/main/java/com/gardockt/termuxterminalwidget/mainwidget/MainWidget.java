@@ -96,6 +96,12 @@ public class MainWidget extends AppWidgetProvider {
                             .distinctUntilChanged()
                             .subscribe((colorScheme) -> onGlobalColorSchemeChanged(context, widgetId, colorScheme))
             );
+            subscriptions.add(
+                    globalPrefsObservable
+                            .map(GlobalPreferences::getTextSizeSp)
+                            .distinctUntilChanged()
+                            .subscribe((textSize) -> onGlobalTextSizeChanged(context, widgetId, textSize))
+            );
             subscriptionsByWidgetId.put(widgetId, subscriptions);
         }
 
@@ -143,8 +149,14 @@ public class MainWidget extends AppWidgetProvider {
         views.setInt(R.id.text, "setBackgroundColor", colorScheme.getColorBackground());
     }
 
+    private static void setTextSize(@NonNull RemoteViews views, int textSizeSp) {
+        Log.d(TAG, "Setting text size to " + textSizeSp);
+        views.setFloat(R.id.text, "setTextSize", textSizeSp);
+    }
+
     private static void applyGlobalPreferences(@NonNull RemoteViews views, @NonNull GlobalPreferences preferences) {
         setColorScheme(views, preferences.getColorScheme());
+        setTextSize(views, preferences.getTextSizeSp());
     }
 
     // Returns RemoteViews object representing the widget, initialized with settings.
@@ -156,6 +168,10 @@ public class MainWidget extends AppWidgetProvider {
 
         if (preferences.getColorScheme() != null) {
             setColorScheme(views, preferences.getColorScheme());
+        }
+
+        if (preferences.getTextSizeSp() != null) {
+            setTextSize(views, preferences.getTextSizeSp());
         }
 
         return views;
@@ -189,6 +205,15 @@ public class MainWidget extends AppWidgetProvider {
             MainWidgetPreferences widgetPreferences = MainWidgetPreferencesManager.load(context, widgetId);
             if (widgetPreferences.getColorScheme() == null) {
                 updateRemoteViews(context, widgetId, MainWidget::setColorScheme, colorScheme);
+            }
+        } catch (InvalidConfigurationException ignored) {}
+    }
+
+    private static void onGlobalTextSizeChanged(@NonNull Context context, int widgetId, int textSize) {
+        try {
+            MainWidgetPreferences widgetPreferences = MainWidgetPreferencesManager.load(context, widgetId);
+            if (widgetPreferences.getTextSizeSp() == null) {
+                updateRemoteViews(context, widgetId, MainWidget::setTextSize, textSize);
             }
         } catch (InvalidConfigurationException ignored) {}
     }

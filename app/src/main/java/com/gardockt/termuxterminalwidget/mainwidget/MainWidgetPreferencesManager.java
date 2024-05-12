@@ -15,12 +15,14 @@ public class MainWidgetPreferencesManager {
     private static final String KEY_COMMAND = "command";
     private static final String KEY_COLOR_FOREGROUND = "color_foreground";
     private static final String KEY_COLOR_BACKGROUND = "color_background";
+    private static final String KEY_TEXT_SIZE_SP = "text_size_sp";
 
     @NonNull
     public static MainWidgetPreferences load(@NonNull Context context, int widgetId) throws InvalidConfigurationException {
         SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         MainWidgetPreferences preferences;
 
+        // command
         String command = sharedPreferences.getString(generateKey(widgetId, KEY_COMMAND), null);
         if (command == null) {
             throw new InvalidConfigurationException("Command is null");
@@ -28,6 +30,7 @@ public class MainWidgetPreferencesManager {
 
         preferences = new MainWidgetPreferences(command);
 
+        // color scheme
         boolean colorSchemeSet = true;
 
         int colorForeground = 0;
@@ -51,18 +54,27 @@ public class MainWidgetPreferencesManager {
             preferences.setColorScheme(colorScheme);
         }
 
+        // text size
+        String textSizeSpKey = generateKey(widgetId, KEY_TEXT_SIZE_SP);
+        if (sharedPreferences.contains(textSizeSpKey)) {
+            int textSizeSp = sharedPreferences.getInt(textSizeSpKey, 0);
+            preferences.setTextSizeSp(textSizeSp);
+        }
+
         return preferences;
     }
 
     public static void save(@NonNull Context context, int widgetId, @NonNull MainWidgetPreferences preferences) throws InvalidConfigurationException {
         SharedPreferences.Editor editor = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit();
 
+        // command
         String command = preferences.getCommand();
         if (command == null) {
             throw new InvalidConfigurationException("Command is null");
         }
         editor.putString(generateKey(widgetId, KEY_COMMAND), command);
 
+        // color scheme
         ColorScheme colorScheme = preferences.getColorScheme();
         if (colorScheme != null) {
             editor.putInt(generateKey(widgetId, KEY_COLOR_FOREGROUND), colorScheme.getColorForeground());
@@ -70,6 +82,14 @@ public class MainWidgetPreferencesManager {
         } else {
             editor.remove(generateKey(widgetId, KEY_COLOR_FOREGROUND));
             editor.remove(generateKey(widgetId, KEY_COLOR_BACKGROUND));
+        }
+
+        // text size
+        Integer textSizeSp = preferences.getTextSizeSp();
+        if (textSizeSp != null) {
+            editor.putInt(generateKey(widgetId, KEY_TEXT_SIZE_SP), textSizeSp);
+        } else {
+            editor.remove(generateKey(widgetId, KEY_TEXT_SIZE_SP));
         }
 
         editor.apply();
@@ -81,6 +101,7 @@ public class MainWidgetPreferencesManager {
         editor.remove(generateKey(widgetId, KEY_COMMAND));
         editor.remove(generateKey(widgetId, KEY_COLOR_FOREGROUND));
         editor.remove(generateKey(widgetId, KEY_COLOR_BACKGROUND));
+        editor.remove(generateKey(widgetId, KEY_TEXT_SIZE_SP));
 
         editor.apply();
     }

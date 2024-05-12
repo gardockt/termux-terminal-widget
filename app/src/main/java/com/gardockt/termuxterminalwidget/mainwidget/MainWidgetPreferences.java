@@ -6,6 +6,7 @@ public class MainWidgetPreferences {
 
     private String command;
     private ColorScheme colorScheme = null;
+    private Integer textSizeSp = null;
 
     public MainWidgetPreferences(String command) {
         this.command = command;
@@ -25,5 +26,13 @@ public class MainWidgetPreferences {
 
     public void setColorScheme(ColorScheme colorScheme) {
         this.colorScheme = colorScheme;
+    }
+
+    public Integer getTextSizeSp() {
+        return textSizeSp;
+    }
+
+    public void setTextSizeSp(Integer textSizeSp) {
+        this.textSizeSp = textSizeSp;
     }
 }

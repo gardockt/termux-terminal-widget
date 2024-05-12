@@ -12,6 +12,7 @@ import io.reactivex.rxjava3.subjects.BehaviorSubject;
 public class GlobalPreferencesUtils {
     private static final String KEY_DEFAULT_COLOR_FOREGROUND = "default_color_foreground";
     private static final String KEY_DEFAULT_COLOR_BACKGROUND = "default_color_background";
+    private static final String KEY_DEFAULT_TEXT_SIZE_SP = "default_text_size_sp";
 
     private static final BehaviorSubject<GlobalPreferences> preferencesSubject = BehaviorSubject.create();
 
@@ -40,6 +41,7 @@ public class GlobalPreferencesUtils {
         GlobalPreferences preferences = new GlobalPreferences();
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 
+        // color scheme
         Integer colorForeground = null;
         Integer colorBackground = null;
 
@@ -54,6 +56,12 @@ public class GlobalPreferencesUtils {
             preferences.setColorScheme(colorScheme);
         }
 
+        // text size
+        if (sharedPreferences.contains(KEY_DEFAULT_TEXT_SIZE_SP)) {
+            int textSizeSp = sharedPreferences.getInt(KEY_DEFAULT_TEXT_SIZE_SP, 0);
+            preferences.setTextSizeSp(textSizeSp);
+        }
+
         preferencesSubject.onNext(preferences);
         return preferences;
     }
@@ -64,6 +72,7 @@ public class GlobalPreferencesUtils {
         sharedPreferences.edit()
                 .putInt(KEY_DEFAULT_COLOR_FOREGROUND, preferences.getColorScheme().getColorForeground())
                 .putInt(KEY_DEFAULT_COLOR_BACKGROUND, preferences.getColorScheme().getColorBackground())
+                .putInt(KEY_DEFAULT_TEXT_SIZE_SP, preferences.getTextSizeSp())
                 .apply();
 
         preferencesSubject.onNext(preferences);

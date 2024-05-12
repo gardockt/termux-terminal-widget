@@ -102,6 +102,21 @@
                 android:layout_weight="2" />
         </LinearLayout>
 
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="@string/text_size"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/field_text_size"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:inputType="number" />
+
         <Button
             android:id="@+id/confirm_button"
             android:layout_width="wrap_content"

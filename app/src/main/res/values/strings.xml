@@ -7,6 +7,8 @@
     <string name="colors">Colors</string>
     <string name="default_colors">Default colors</string>
     <string name="custom_colors">Custom colors</string>
+    <string name="text_size">Text size</string>
+    <string name="default_text_size">Default text size</string>
     <string name="foreground">Foreground</string>
     <string name="background">Background</string>
 

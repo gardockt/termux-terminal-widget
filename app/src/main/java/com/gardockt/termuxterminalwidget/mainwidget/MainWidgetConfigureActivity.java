@@ -24,6 +24,8 @@ import com.gardockt.termuxterminalwidget.databinding.MainWidgetConfigureBinding;
 import com.gardockt.termuxterminalwidget.exceptions.InvalidConfigurationException;
 import com.jaredrummler.android.colorpicker.ColorPickerDialogListener;
 
+import java.util.Locale;
+
 public class MainWidgetConfigureActivity extends AppCompatActivity implements ColorPickerDialogListener {
 
     private static final String TAG = MainWidgetConfigureActivity.class.getSimpleName();
@@ -35,14 +37,18 @@ public class MainWidgetConfigureActivity extends AppCompatActivity implements Co
     private LinearLayout customColorsLayout;
     private ColorButton colorForegroundButton;
     private ColorButton colorBackgroundButton;
+    private EditText textSizeField;
 
     private final View.OnClickListener onConfirmButtonClickListener = new View.OnClickListener() {
         public void onClick(View v) {
             final Context context = MainWidgetConfigureActivity.this;
 
+            // command
             String command = commandField.getText().toString();
 
             MainWidgetPreferences preferences = new MainWidgetPreferences(command);
+
+            // color scheme
             if (customColorsSwitch.isChecked()) {
                 ColorScheme colorScheme = new ColorScheme(
                         colorForegroundButton.getColor(),
@@ -50,6 +56,12 @@ public class MainWidgetConfigureActivity extends AppCompatActivity implements Co
                 );
                 preferences.setColorScheme(colorScheme);
             }
+
+            // text size
+            String textSizeString = textSizeField.getText().toString();
+            try {
+                preferences.setTextSizeSp(Integer.parseInt(textSizeString));
+            } catch (NumberFormatException ignored) {}
 
             try {
                 MainWidget.createWidget(context, widgetId, preferences);
@@ -106,6 +118,8 @@ public class MainWidgetConfigureActivity extends AppCompatActivity implements Co
                 )
         );
 
+        textSizeField = binding.fieldTextSize;
+
         // Find the widget id from the intent.
         Intent intent = getIntent();
         Bundle extras = intent.getExtras();
@@ -127,13 +141,16 @@ public class MainWidgetConfigureActivity extends AppCompatActivity implements Co
             preferences = new MainWidgetPreferences("");
         }
 
-        commandField.setText(preferences.getCommand());
-
-        prepareCustomColors(preferences);
+        fillSettings(preferences);
     }
 
-    private void prepareCustomColors(@NonNull MainWidgetPreferences widgetPreferences) {
+    private void fillSettings(@NonNull MainWidgetPreferences widgetPreferences) {
         GlobalPreferences globalPreferences = GlobalPreferencesUtils.get(this);
+
+        // command
+        commandField.setText(widgetPreferences.getCommand());
+
+        // color scheme
         ColorScheme colorScheme = widgetPreferences.getColorScheme();
         boolean customColorsEnabled = (colorScheme != null);
 
@@ -145,6 +162,15 @@ public class MainWidgetConfigureActivity extends AppCompatActivity implements Co
         colorBackgroundButton.setColor(colorScheme.getColorBackground());
 
         customColorsSwitch.setChecked(customColorsEnabled);
+
+        // text size
+        Integer textSize = widgetPreferences.getTextSizeSp();
+        int globalTextSize = globalPreferences.getTextSizeSp();
+
+        if (textSize != null) {
+            textSizeField.setText(String.format(Locale.getDefault(), "%d", textSize));
+        }
+        textSizeField.setHint(String.format(Locale.getDefault(), "%d", globalTextSize));
     }
 
     @Override

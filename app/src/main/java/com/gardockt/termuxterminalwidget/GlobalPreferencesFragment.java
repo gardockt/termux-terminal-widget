@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -14,12 +15,15 @@ import androidx.fragment.app.Fragment;
 import com.gardockt.termuxterminalwidget.components.ColorButton;
 import com.jaredrummler.android.colorpicker.ColorPickerDialogListener;
 
+import java.util.Locale;
+
 public class GlobalPreferencesFragment extends Fragment implements ColorPickerDialogListener {
 
     private static final String TAG = GlobalPreferencesFragment.class.getSimpleName();
 
     private ColorButton colorForegroundButton;
     private ColorButton colorBackgroundButton;
+    private EditText textSizeField;
     private Button saveButton;
 
     private GlobalPreferences preferences;
@@ -32,11 +36,18 @@ public class GlobalPreferencesFragment extends Fragment implements ColorPickerDi
         GlobalPreferences newPreferences = new GlobalPreferences();
         Context context = requireContext();
 
+        // color scheme
         ColorScheme colorScheme = new ColorScheme(
                 colorForegroundButton.getColor(),
                 colorBackgroundButton.getColor()
         );
         newPreferences.setColorScheme(colorScheme);
+
+        // text size
+        try {
+            int textSizeSp = Integer.parseInt(textSizeField.getText().toString());
+            newPreferences.setTextSizeSp(textSizeSp);
+        } catch (NumberFormatException ignored) {}
 
         GlobalPreferencesUtils.save(context, newPreferences);
         Toast.makeText(context, R.string.settings_saved, Toast.LENGTH_SHORT).show();
@@ -50,6 +61,7 @@ public class GlobalPreferencesFragment extends Fragment implements ColorPickerDi
 
         colorForegroundButton = view.findViewById(R.id.color_foreground_button);
         colorBackgroundButton = view.findViewById(R.id.color_background_button);
+        textSizeField = view.findViewById(R.id.field_text_size);
         saveButton = view.findViewById(R.id.save_button);
 
         colorForegroundButton.setOnClickListener(
@@ -64,6 +76,10 @@ public class GlobalPreferencesFragment extends Fragment implements ColorPickerDi
                         getActivity(),
                         colorBackgroundButton.getColor()
                 )
+        );
+
+        textSizeField.setText(
+                String.format(Locale.getDefault(), "%d", preferences.getTextSizeSp())
         );
 
         saveButton.setOnClickListener((v) -> save());

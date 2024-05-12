@@ -7,6 +7,7 @@ import java.util.Objects;
 public class GlobalPreferences implements Cloneable {
 
     private ColorScheme colorScheme = new ColorScheme(0xFFFFFFFF, 0xBF000000);
+    private int textSizeSp = 14;
 
     public ColorScheme getColorScheme() {
         return colorScheme;
@@ -14,6 +15,14 @@ public class GlobalPreferences implements Cloneable {
 
     public void setColorScheme(@NonNull ColorScheme colorScheme) {
         this.colorScheme = colorScheme;
+    }
+
+    public int getTextSizeSp() {
+        return textSizeSp;
+    }
+
+    public void setTextSizeSp(int textSizeSp) {
+        this.textSizeSp = textSizeSp;
     }
 
     @NonNull
@@ -33,11 +42,15 @@ public class GlobalPreferences implements Cloneable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         GlobalPreferences that = (GlobalPreferences) o;
-        return Objects.equals(colorScheme, that.colorScheme);
+        return Objects.equals(colorScheme, that.colorScheme) &&
+                textSizeSp == that.textSizeSp;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(colorScheme);
+        return Objects.hash(
+                colorScheme,
+                textSizeSp
+        );
     }
 }
