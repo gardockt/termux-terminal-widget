@@ -38,12 +38,14 @@
             android:id="@+id/custom_colors_switch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
             android:text="@string/custom_colors" />
 
         <LinearLayout
             android:id="@+id/custom_colors_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
             android:gravity="center"
             android:orientation="horizontal"
             android:visibility="gone">
